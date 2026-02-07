@@ -1,62 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>XonoHub Key Generator</title>
-  <meta charset="UTF-8">
-  <style>
-    body { background:#111; color:white; font-family:sans-serif; text-align:center; }
-    h2 { margin-top:50px; }
-    #key { font-size:24px; font-weight:bold; margin:20px 0; }
-    p { margin:10px 0; }
-    button { padding:10px 20px; font-size:16px; cursor:pointer; margin-top:20px; }
-  </style>
-</head>
-<body>
+<meta charset="UTF-8">
+<title>XonoHub Key</title>
 
-<h2>Your XonoHub Key</h2>
-<p id="key">Loading...</p>
-<p>Copy this key and paste it into your hub</p>
-<button id="refresh">Get New Key</button>
-
-<script>
-const DAY = 86400; // 24 hours in seconds
-const keyLabel = document.getElementById("key");
-const refreshBtn = document.getElementById("refresh");
-
-// fetch keys from the same origin (keys.json must be in the root folder)
-async function fetchKey() {
-  try {
-    const res = await fetch("keys.json");
-    const data = await res.json();
-    const now = Math.floor(Date.now()/1000);
-
-    // filter valid keys: not expired, not HWID-locked
-    const validKeys = Object.keys(data).filter(k => {
-      const entry = data[k];
-      return (!entry.hwid) && ((now - entry.created) <= DAY);
-    });
-
-    if (validKeys.length === 0) {
-      keyLabel.innerText = "No valid keys available, try later";
-      return;
-    }
-
-    // pick a random key
-    const randomKey = validKeys[Math.floor(Math.random() * validKeys.length)];
-    keyLabel.innerText = randomKey;
-
-  } catch (err) {
-    console.error(err);
-    keyLabel.innerText = "Failed to fetch keys";
-  }
+<style>
+body {
+    background-color: #0f0f0f;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-// initial fetch
-fetchKey();
+.box {
+    background: #1a1a1a;
+    padding: 30px;
+    border-radius: 10px;
+    width: 350px;
+    text-align: center;
+}
 
-// allow user to get a new key on button click
-refreshBtn.addEventListener("click", fetchKey);
+button {
+    margin-top: 15px;
+    padding: 10px;
+    width: 100%;
+    background: #3a3a3a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #555;
+}
+
+.key {
+    margin-top: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #00ff99;
+    word-break: break-all;
+}
+</style>
+</head>
+
+<body>
+<div class="box">
+    <h2>XonoHub Key System</h2>
+    <p>Click the button below to generate your key</p>
+    <button onclick="generateKey()">Generate Key</button>
+    <div class="key" id="keyOutput"></div>
+</div>
+
+<script>
+const BIN_URL = "https://api.jsonbin.io/v3/b/698790f243b1c97be96d1a9f/latest";
+
+async function generateKey() {
+    const output = document.getElementById("keyOutput");
+    output.textContent = "Loading...";
+
+    try {
+        const res = await fetch(BIN_URL);
+        const data = await res.json();
+
+        const keys = data.record.keys;
+        if (!keys || keys.length === 0) {
+            output.textContent = "No keys available";
+            return;
+        }
+
+        const randomKey = keys[Math.floor(Math.random() * keys.length)];
+        output.textContent = randomKey;
+    } catch (err) {
+        output.textContent = "Failed to fetch key";
+        console.error(err);
+    }
+}
 </script>
-
 </body>
 </html>
