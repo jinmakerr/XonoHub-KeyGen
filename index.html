@@ -6,18 +6,36 @@
 <body style="background:#111;color:white;font-family:sans-serif;text-align:center">
 
 <h2>Your XonoHub Key</h2>
-<p id="key">Generating...</p>
+<p id="key">Loading...</p>
 <p>Copy this key and paste it into your hub</p>
 
 <script>
-function genKey() {
-  return "XONO-" + Math.random().toString(36).substring(2,12).toUpperCase();
-}
+const PASTEBIN_RAW = "https://pastebin.com/raw/zFUasAyk"; // your JSON with 400 keys
+const DAY = 86400; // 24 hours in seconds
 
-const key = genKey();
-document.getElementById("key").innerText = key;
+// fetch keys from Pastebin
+fetch(PASTEBIN_RAW)
+  .then(r => r.json())
+  .then(data => {
+    const now = Math.floor(Date.now()/1000);
+    // filter keys: not expired and not HWID-locked
+    const validKeys = Object.keys(data).filter(k => {
+      const entry = data[k];
+      return (!entry.hwid) && ((now - entry.created) <= DAY);
+    });
 
-// Manual step: You copy this key into your Pastebin JSON
+    if (validKeys.length === 0) {
+      document.getElementById("key").innerText = "No valid keys available, try later";
+      return;
+    }
+
+    // randomly pick one valid key
+    const randomKey = validKeys[Math.floor(Math.random()*validKeys.length)];
+    document.getElementById("key").innerText = randomKey;
+  })
+  .catch(() => {
+    document.getElementById("key").innerText = "Failed to fetch keys";
+  });
 </script>
 
 </body>
