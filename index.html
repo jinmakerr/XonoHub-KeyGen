@@ -58,26 +58,36 @@ button:hover {
 
 <script>
 const BIN_URL = "https://api.jsonbin.io/v3/b/698790f243b1c97be96d1a9f/latest";
+const COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours
 
 async function generateKey() {
     const output = document.getElementById("keyOutput");
+
+    const lastGen = localStorage.getItem("xono_last_gen");
+    if (lastGen && Date.now() - Number(lastGen) < COOLDOWN) {
+        const hoursLeft = Math.ceil((COOLDOWN - (Date.now() - lastGen)) / 3600000);
+        output.textContent = `Come back in ${hoursLeft} hour(s)`;
+        return;
+    }
+
     output.textContent = "Loading...";
 
     try {
         const res = await fetch(BIN_URL);
         const data = await res.json();
-
         const keys = data.record.keys;
+
         if (!keys || keys.length === 0) {
             output.textContent = "No keys available";
             return;
         }
 
-        const randomKey = keys[Math.floor(Math.random() * keys.length)];
-        output.textContent = randomKey;
-    } catch (err) {
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        output.textContent = key;
+
+        localStorage.setItem("xono_last_gen", Date.now());
+    } catch {
         output.textContent = "Failed to fetch key";
-        console.error(err);
     }
 }
 </script>
