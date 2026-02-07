@@ -10,10 +10,10 @@
 <p>Copy this key and paste it into your hub</p>
 
 <script>
-const PASTEBIN_RAW = "https://pastebin.com/raw/zFUasAyk"; // your JSON with 400 keys
+const PASTEBIN_RAW = "https://raw.githubusercontent.com/jinmakerr/XonoHub-KeyGen/main/keys.json"; // your GitHub keys.json
 const DAY = 86400; // 24 hours in seconds
 
-// fetch keys from Pastebin
+// fetch keys from GitHub repo
 fetch(PASTEBIN_RAW)
   .then(r => r.json())
   .then(data => {
