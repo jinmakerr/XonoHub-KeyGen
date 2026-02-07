@@ -1,41 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>XonoHub Key</title>
+  <title>XonoHub Key Generator</title>
+  <meta charset="UTF-8">
+  <style>
+    body { background:#111; color:white; font-family:sans-serif; text-align:center; }
+    h2 { margin-top:50px; }
+    #key { font-size:24px; font-weight:bold; margin:20px 0; }
+    p { margin:10px 0; }
+    button { padding:10px 20px; font-size:16px; cursor:pointer; margin-top:20px; }
+  </style>
 </head>
-<body style="background:#111;color:white;font-family:sans-serif;text-align:center">
+<body>
 
 <h2>Your XonoHub Key</h2>
 <p id="key">Loading...</p>
 <p>Copy this key and paste it into your hub</p>
+<button id="refresh">Get New Key</button>
 
 <script>
-const PASTEBIN_RAW = "https://raw.githubusercontent.com/jinmakerr/XonoHub-KeyGen/main/keys.json"; // your GitHub keys.json
 const DAY = 86400; // 24 hours in seconds
+const keyLabel = document.getElementById("key");
+const refreshBtn = document.getElementById("refresh");
 
-// fetch keys from GitHub repo
-fetch(PASTEBIN_RAW)
-  .then(r => r.json())
-  .then(data => {
+// fetch keys from the same origin (keys.json must be in the root folder)
+async function fetchKey() {
+  try {
+    const res = await fetch("keys.json");
+    const data = await res.json();
     const now = Math.floor(Date.now()/1000);
-    // filter keys: not expired and not HWID-locked
+
+    // filter valid keys: not expired, not HWID-locked
     const validKeys = Object.keys(data).filter(k => {
       const entry = data[k];
       return (!entry.hwid) && ((now - entry.created) <= DAY);
     });
 
     if (validKeys.length === 0) {
-      document.getElementById("key").innerText = "No valid keys available, try later";
+      keyLabel.innerText = "No valid keys available, try later";
       return;
     }
 
-    // randomly pick one valid key
-    const randomKey = validKeys[Math.floor(Math.random()*validKeys.length)];
-    document.getElementById("key").innerText = randomKey;
-  })
-  .catch(() => {
-    document.getElementById("key").innerText = "Failed to fetch keys";
-  });
+    // pick a random key
+    const randomKey = validKeys[Math.floor(Math.random() * validKeys.length)];
+    keyLabel.innerText = randomKey;
+
+  } catch (err) {
+    console.error(err);
+    keyLabel.innerText = "Failed to fetch keys";
+  }
+}
+
+// initial fetch
+fetchKey();
+
+// allow user to get a new key on button click
+refreshBtn.addEventListener("click", fetchKey);
 </script>
 
 </body>
