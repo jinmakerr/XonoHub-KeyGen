@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>XonoHub Key</title>
+</head>
+<body style="background:#111;color:white;font-family:sans-serif;text-align:center">
+
+<h2>Your XonoHub Key</h2>
+<p id="key">Generating...</p>
+<p>Copy this key and paste it into your hub</p>
+
+<script>
+function genKey() {
+  return "XONO-" + Math.random().toString(36).substring(2,12).toUpperCase();
+}
+
+const key = genKey();
+document.getElementById("key").innerText = key;
+
+// Manual step: You copy this key into your Pastebin JSON
+</script>
+
+</body>
+</html>
